@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>예산 · 가계부 · 현금흐름 대시보드 (정적, 무서버)</title>
+
+  <!-- 폰트·차트 CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- 외부 CSS -->
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header>
+    <div class="row">
+      <div class="logo"><div class="logo-badge"></div> <span>Budget Dashboard</span></div>
+      <div class="toolbar">
+        <button class="btn" id="btnPrevMonth">◀ 이전달</button>
+        <div class="btn" style="cursor:default" id="currentMonthLabel"></div>
+        <button class="btn" id="btnNextMonth">다음달 ▶</button>
+        <button class="btn" id="btnExport">CSV 내보내기</button>
+        <!-- 라벨+파일 인풋(네이티브 파일 선택) -->
+        <label class="btn" for="importFile" style="position:relative; overflow:hidden">
+          CSV 가져오기
+          <input id="importFile" type="file" accept=".csv" style="position:absolute; inset:0; opacity:0; cursor:pointer">
+        </label>
+        <button class="btn" id="btnReset" title="모든 데이터를 삭제합니다">초기화</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="app">
+    <section class="grid cols-3" id="summary">
+      <div class="card"><h3>총 수입</h3><div class="value" id="sumIncome">0</div><div class="hint" id="countIncome">—</div></div>
+      <div class="card"><h3>총 지출</h3><div class="value" id="sumExpense">0</div><div class="hint" id="countExpense">—</div></div>
+      <div class="card"><h3>순현금흐름</h3><div class="value" id="netCash">0</div><div class="hint" id="savingRate">저축률 —</div></div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="grid cols-3">
+      <div class="card" style="grid-column: span 2">
+        <div class="section-title">거래 추가</div>
+        <div class="row wrap">
+          <div class="field">
+            <label>날짜</label>
+            <input type="date" id="txDate" />
+          </div>
+          <div class="field" style="min-width:220px">
+            <label>설명</label>
+            <input type="text" id="txDesc" placeholder="예: 스타벅스, 급여"/>
+          </div>
+          <div class="field">
+            <label>카테고리</label>
+            <select id="txCategory"></select>
+          </div>
+          <div class="field">
+            <label>유형</label>
+            <select id="txType">
+              <option value="income">수입</option>
+              <option value="expense">지출</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>금액</label>
+            <input type="number" id="txAmount" placeholder="0" step="0.01"/>
+          </div>
+          <div class="field" style="align-self:flex-end; min-width:140px">
+            <button class="btn primary" id="btnAdd">추가</button>
+          </div>
+        </div>
+        <div class="hint" style="margin-top:8px">Tip: 카테고리는 설정 → 기본 카테고리 수정 가능</div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">설정</div>
+        <div class="stack">
+          <div class="field">
+            <label>통화표시(ISO 코드)</label>
+            <input type="text" id="currencyCode" placeholder="KRW" maxlength="3"/>
+          </div>
+          <div class="field">
+            <label>기본 카테고리(쉼표로 구분)</label>
+            <input type="text" id="categorySeed" placeholder="급여, 외주, 식비, 카페, 주거, 교통, 쇼핑, 구독, 의료, 교육"/>
+          </div>
+          <button class="btn" id="btnApplySettings">적용</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="grid cols-3">
+      <div class="card" style="grid-column: span 2">
+        <div class="section-title">거래 내역</div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:120px">날짜</th>
+              <th>설명</th>
+              <th style="width:160px">카테고리</th>
+              <th style="width:120px">유형</th>
+              <th class="right" style="width:150px">금액</th>
+              <th style="width:120px">작업</th>
+            </tr>
+          </thead>
+          <tbody id="txTbody"></tbody>
+        </table>
+        <div class="row" style="justify-content:space-between; margin-top:8px">
+          <div class="hint" id="txCount">—</div>
+          <div class="row">
+            <input type="month" id="monthPicker" />
+            <button class="btn" id="btnThisMonth">이번달</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">지출 비중(카테고리)</div>
+        <canvas id="pieCategory" height="250"></canvas>
+        <div class="section-title" style="margin-top:16px">일자별 순현금흐름</div>
+        <canvas id="lineNet" height="220"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <!-- 외부 JS -->
+  <script src="./app.js"></script>
+</body>
+</html>
